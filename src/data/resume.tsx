@@ -68,15 +68,15 @@ export const DATA: ResumeData = {
       end: "Present",
       positionType: "Full-time",
       description:
-        "Building KoalaWare — AI session replay analytics. Backed by $1M seed from Y Combinator, OVO Fund, and angel investors.",
+        "Building KoalaWare — AI session replay analytics. Backed by $1M pre-seed from Y Combinator, OVO Fund, and angel investors.",
     },
     {
       company: "Stanford Artificial Intelligence Laboratory",
       badges: [],
       href: "",
       location: "Remote",
-      title: "Deep Learning Fellow",
-      logoUrl: "/Untitled design.png",
+      title: "Deep Learning Fellow @ NLP Group",
+      logoUrl: "/Untitled design.pngc",
       start: "January 2025",
       end: "Present",
       positionType: "Full-time",
