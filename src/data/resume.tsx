@@ -76,7 +76,7 @@ export const DATA: ResumeData = {
       href: "",
       location: "Remote",
       title: "Deep Learning Fellow @ NLP Group",
-      logoUrl: "/Untitled design.pngc",
+      logoUrl: "/Untitled design.png",
       start: "January 2025",
       end: "Present",
       positionType: "Full-time",
