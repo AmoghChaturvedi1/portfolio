@@ -145,10 +145,12 @@ export default function Page() {
                   positionType={work.positionType}
                   subtabs={work.subtabs ? work.subtabs.map(subtab => {
                     let mobileSubtabTitle = subtab.title;
+                    let mobileSubtabSubtitle = subtab.subtitle;
+                    
                     if (subtab.title === "Ubicloud (YC W24)") {
                       mobileSubtabTitle = "Ubicloud";
                     } else if (subtab.title === "Stanford Institute for Economic Policy Research") {
-                      mobileSubtabTitle = "Stanford Economics Dept.";
+                      mobileSubtabTitle = "Stanford Economics.";
                     } else if (subtab.title === "Zage Lab, UC San Diego") {
                       mobileSubtabTitle = "UC San Diego";
                     } else if (subtab.title === "Burton Lab, Scripps Research Institute") {
@@ -157,9 +159,16 @@ export default function Page() {
                       mobileSubtabTitle = "SDSC";
                     }
                     
+                    if (isMobile && subtab.subtitle) {
+                      if (subtab.subtitle === "Product Manager, Growth") {
+                        mobileSubtabSubtitle = "Product Manager";
+                      }
+                    }
+                    
                     return {
                       ...subtab,
-                      title: isMobile ? mobileSubtabTitle : subtab.title
+                      title: isMobile ? mobileSubtabTitle : subtab.title,
+                      subtitle: isMobile ? mobileSubtabSubtitle : subtab.subtitle
                     };
                   }) : undefined}
                   isMobile={isMobile}
@@ -205,13 +214,22 @@ export default function Page() {
                   isEducation={true}
                   subtabs={education.subtabs ? education.subtabs.map(subtab => {
                     let mobileSubtabTitle = subtab.title;
+                    let mobileSubtabSubtitle = subtab.subtitle;
+                    
                     if (subtab.title === "San Diego State University") {
                       mobileSubtabTitle = "SDSU";
                     }
                     
+                    if (isMobile && subtab.subtitle) {
+                      if (subtab.subtitle === "Dual Enrollment, Mathematics") {
+                        mobileSubtabSubtitle = "Dual Enrollment";
+                      }
+                    }
+                    
                     return {
                       ...subtab,
-                      title: isMobile ? mobileSubtabTitle : subtab.title
+                      title: isMobile ? mobileSubtabTitle : subtab.title,
+                      subtitle: isMobile ? mobileSubtabSubtitle : subtab.subtitle
                     };
                   }) : undefined}
                   isMobile={isMobile}
@@ -224,10 +242,10 @@ export default function Page() {
       <section id="awards">
         <div className="flex flex-col gap-4">
           <div className="flex items-center">
-            <h2 className="text-xl font-bold mr-auto">awards</h2>
+            <h2 className={`text-xl font-bold ${isMobile ? 'mb-2' : ''} mr-auto`}>awards</h2>
             
             {visibleSections.awards && (
-              <div className="flex gap-2 mr-3">
+              <div className={`flex gap-2 mr-3 ${isMobile ? 'mt-2' : ''}`}>
                 {["Olympiad", "Research", "Other"].map((tab) => (
                   <div 
                     key={tab} 
@@ -242,7 +260,7 @@ export default function Page() {
             
             <button 
               onClick={() => toggleSection('awards')} 
-              className="p-1 flex items-center justify-center h-8 w-8 rounded-md hover:bg-muted"
+              className={`p-1 flex items-center justify-center h-8 w-8 rounded-md hover:bg-muted ${isMobile ? 'mt-2' : ''}`}
               aria-label={visibleSections.awards ? "Collapse awards" : "Expand awards"}
             >
               {visibleSections.awards ? <X size={20} /> : <MenuIcon size={20} />}
