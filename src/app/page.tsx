@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { DATA } from "@/data/resume";
 import Link from "next/link";
 import Markdown from "react-markdown";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { MenuIcon, X } from "lucide-react";
 
 const BLUR_FADE_DELAY = 0.04;
@@ -24,45 +24,52 @@ export default function Page() {
     awards: false
   });
 
+  // Debounced resize handler to prevent excessive re-renders
+  const checkIfMobile = useCallback(() => {
+    const mobile = window.innerWidth < 768;
+    setIsMobile(mobile);
+    
+    // Only update section visibility on first load or when transitioning between mobile/desktop
+    if (mobile !== isMobile) {
+      setVisibleSections({
+        work: !mobile,
+        education: !mobile,
+        awards: !mobile
+      });
+    }
+  }, [isMobile]);
+  
   // Check if mobile on mount and when window resizes
   useEffect(() => {
-    const checkIfMobile = () => {
-      const mobile = window.innerWidth < 768;
-      setIsMobile(mobile);
-      
-      // Set initial states based on device - expanded on desktop, collapsed on mobile
-      if (!mobile) {
-        setVisibleSections({
-          work: true,
-          education: true,
-          awards: true
-        });
-      } else {
-        setVisibleSections({
-          work: false,
-          education: false,
-          awards: false
-        });
-      }
-    };
-    
     // Initial check
     checkIfMobile();
     
+    // Debounce resize event
+    let resizeTimer: NodeJS.Timeout;
+    const handleResize = () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        checkIfMobile();
+      }, 250); // 250ms debounce
+    };
+    
     // Add event listener
-    window.addEventListener("resize", checkIfMobile);
+    window.addEventListener("resize", handleResize);
     
     // Cleanup
-    return () => window.removeEventListener("resize", checkIfMobile);
-  }, []);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      clearTimeout(resizeTimer);
+    };
+  }, [checkIfMobile]);
 
-  // Toggle section visibility
-  const toggleSection = (section: 'work' | 'education' | 'awards') => {
+  // Use a more stable toggle function that won't re-create on render
+  const toggleSection = useCallback((section: 'work' | 'education' | 'awards') => {
     setVisibleSections(prev => ({
       ...prev,
       [section]: !prev[section]
     }));
-  };
+  }, []);
 
   return (
     <main className="flex flex-col min-h-[100dvh] space-y-4">
