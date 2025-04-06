@@ -75,7 +75,7 @@ export const DATA: ResumeData = {
       badges: [],
       href: "",
       location: "Remote",
-      title: "Deep Learning Fellow @ NLP Group",
+      title: "Deep Learning @ NLP Group",
       logoUrl: "/Untitled design.png",
       start: "January 2025",
       end: "Present",
