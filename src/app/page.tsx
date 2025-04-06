@@ -19,15 +19,31 @@ export default function Page() {
   const [selectedCategory, setSelectedCategory] = useState("Olympiad");
   const [isMobile, setIsMobile] = useState(false);
   const [visibleSections, setVisibleSections] = useState({
-    work: true,
-    education: true,
-    awards: true
+    work: false,
+    education: false,
+    awards: false
   });
 
   // Check if mobile on mount and when window resizes
   useEffect(() => {
     const checkIfMobile = () => {
-      setIsMobile(window.innerWidth < 768);
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+      
+      // Set initial states based on device - expanded on desktop, collapsed on mobile
+      if (!mobile) {
+        setVisibleSections({
+          work: true,
+          education: true,
+          awards: true
+        });
+      } else {
+        setVisibleSections({
+          work: false,
+          education: false,
+          awards: false
+        });
+      }
     };
     
     // Initial check
@@ -90,18 +106,16 @@ export default function Page() {
           <BlurFade delay={BLUR_FADE_DELAY * 5}>
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-bold">work experience</h2>
-              {isMobile && (
-                <button 
-                  onClick={() => toggleSection('work')} 
-                  className="p-1 rounded-md hover:bg-muted"
-                >
-                  {visibleSections.work ? <X size={20} /> : <MenuIcon size={20} />}
-                </button>
-              )}
+              <button 
+                onClick={() => toggleSection('work')} 
+                className="p-1 rounded-md hover:bg-muted"
+              >
+                {visibleSections.work ? <X size={20} /> : <MenuIcon size={20} />}
+              </button>
             </div>
           </BlurFade>
           
-          {(!isMobile || visibleSections.work) && DATA.work.map((work, id) => (
+          {visibleSections.work && DATA.work.map((work, id) => (
             <BlurFade
               key={work.company}
               delay={BLUR_FADE_DELAY * 6 + id * 0.05}
@@ -118,6 +132,7 @@ export default function Page() {
                 description={work.description}
                 positionType={work.positionType}
                 subtabs={work.subtabs}
+                isMobile={isMobile}
               />
             </BlurFade>
           ))}
@@ -128,18 +143,16 @@ export default function Page() {
           <BlurFade delay={BLUR_FADE_DELAY * 7}>
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-bold">education</h2>
-              {isMobile && (
-                <button 
-                  onClick={() => toggleSection('education')} 
-                  className="p-1 rounded-md hover:bg-muted"
-                >
-                  {visibleSections.education ? <X size={20} /> : <MenuIcon size={20} />}
-                </button>
-              )}
+              <button 
+                onClick={() => toggleSection('education')} 
+                className="p-1 rounded-md hover:bg-muted"
+              >
+                {visibleSections.education ? <X size={20} /> : <MenuIcon size={20} />}
+              </button>
             </div>
           </BlurFade>
           
-          {(!isMobile || visibleSections.education) && DATA.education.map((education, id) => (
+          {visibleSections.education && DATA.education.map((education, id) => (
             <BlurFade
               key={education.school}
               delay={BLUR_FADE_DELAY * 8 + id * 0.05}
@@ -154,6 +167,7 @@ export default function Page() {
                 period={education.end ? `${education.start} - ${education.end}` : education.start}
                 isEducation={true}
                 subtabs={education.subtabs}
+                isMobile={isMobile}
               />
             </BlurFade>
           ))}
@@ -161,75 +175,67 @@ export default function Page() {
       </section>
       <section id="awards">
         <div className="flex flex-col gap-4">
-          <div className="flex justify-between items-center">
-            <BlurFade delay={BLUR_FADE_DELAY * 10.6}>
-              <div className="flex justify-between items-center w-full">
-                <h2 className="text-xl font-bold">awards</h2>
-                {isMobile && (
-                  <button 
-                    onClick={() => toggleSection('awards')} 
-                    className="p-1 rounded-md hover:bg-muted"
-                  >
-                    {visibleSections.awards ? <X size={20} /> : <MenuIcon size={20} />}
-                  </button>
-                )}
-              </div>
-            </BlurFade>
+          <div className="flex items-center">
+            <h2 className="text-xl font-bold mr-auto">awards</h2>
             
-            {(!isMobile || visibleSections.awards) && (
-              <BlurFade delay={BLUR_FADE_DELAY * 10.5}>
-                <div className="flex gap-2">
-                  {["Olympiad", "Research", "Startup"].map((tab) => (
-                    <div 
-                      key={tab} 
-                      className={`px-3 py-1 rounded-md text-center cursor-pointer text-sm ${tab === selectedCategory ? "bg-foreground text-background" : "bg-muted text-foreground"}`}
-                      onClick={() => setSelectedCategory(tab)}
-                    >
-                      {tab}
-                    </div>
-                  ))}
-                </div>
-              </BlurFade>
+            {visibleSections.awards && (
+              <div className="flex gap-2 mr-3">
+                {["Olympiad", "Research", "Startup"].map((tab) => (
+                  <div 
+                    key={tab} 
+                    className={`px-3 py-1 rounded-md text-center cursor-pointer text-sm ${tab === selectedCategory ? "bg-foreground text-background" : "bg-muted text-foreground"}`}
+                    onClick={() => setSelectedCategory(tab)}
+                  >
+                    {tab}
+                  </div>
+                ))}
+              </div>
             )}
+            
+            <button 
+              onClick={() => toggleSection('awards')} 
+              className="p-1 flex items-center justify-center h-8 w-8 rounded-md hover:bg-muted"
+              aria-label={visibleSections.awards ? "Collapse awards" : "Expand awards"}
+            >
+              {visibleSections.awards ? <X size={20} /> : <MenuIcon size={20} />}
+            </button>
           </div>
           
-          {(!isMobile || visibleSections.awards) && (
-            <BlurFade delay={BLUR_FADE_DELAY * 10.7}>
-              <ul>
-                {DATA.awards.filter(award => award.category === selectedCategory).map((award, index, arr) => (
-                  <li 
-                    key={award.title} 
-                    className={`py-3 ${index < arr.length - 1 ? "border-b border-border" : ""}`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-x-2">
-                        <span className="text-base font-medium">{award.title}</span>
-                        {award.tag && (
-                          <Badge variant="outline" className="text-xs font-normal">
-                            {award.tag}
-                          </Badge>
-                        )}
-                      </div>
-                      <div className="text-sm tabular-nums text-muted-foreground">{award.date}</div>
+          {visibleSections.awards && (
+            <ul>
+              {DATA.awards.filter(award => award.category === selectedCategory).map((award, index, arr) => (
+                <li 
+                  key={award.title} 
+                  className={`py-3 ${index < arr.length - 1 ? "border-b border-border" : ""}`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-x-2">
+                      <span className="text-base font-medium">{award.title}</span>
+                      {(!isMobile && award.tag) && (
+                        <Badge variant="outline" className="text-xs font-normal">
+                          {award.tag}
+                        </Badge>
+                      )}
                     </div>
-                    {award.description && (
-                      <p className="mt-1 text-sm text-muted-foreground">{award.description}</p>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </BlurFade>
+                    <div className="text-sm tabular-nums text-muted-foreground">{award.date}</div>
+                  </div>
+                  {award.description && (
+                    <p className="mt-1 text-sm text-muted-foreground">{award.description}</p>
+                  )}
+                </li>
+              ))}
+            </ul>
           )}
         </div>
       </section>
-      <section id="contact">
-        <div className="grid items-center justify-center gap-4 px-4 text-center md:px-6 w-full py-12">
+      <section id="contact" className="mt-0">
+        <div className="grid items-center justify-center gap-4 px-4 text-center md:px-6 w-full py-6">
           <BlurFade delay={BLUR_FADE_DELAY * 16}>
             <div className="space-y-3">
               <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">
                 get in touch
               </h2>
-              <p className="mx-auto max-w-[600px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+              <p className="mx-auto max-w-[600px] text-muted-foreground md:text-xl">
                 want to chat? just shoot me an email at{" "}
                 <Link
                   href="mailto:amoghc@stanford.edu"

@@ -28,6 +28,7 @@ interface ResumeCardProps {
     positionType?: string;
     description?: string;
   }[];
+  isMobile?: boolean;
 }
 
 export const ResumeCard = ({
@@ -42,6 +43,7 @@ export const ResumeCard = ({
   positionType,
   isEducation = false,
   subtabs,
+  isMobile = false,
 }: ResumeCardProps) => {
   const [isExpanded, setIsExpanded] = React.useState(false);
   const [expandedSubtabs, setExpandedSubtabs] = React.useState<{[key: number]: boolean}>({});
@@ -81,17 +83,22 @@ export const ResumeCard = ({
         transition={{ duration: 0.2 }}
       >
         <Card className="flex">
-          <div className="flex-none">
-            <Avatar className="border size-12 m-auto bg-muted-background dark:bg-foreground">
-              <AvatarImage
-                src={logoUrl}
-                alt={altText}
-                className="object-contain"
-              />
-              <AvatarFallback>{altText[0]}</AvatarFallback>
-            </Avatar>
-          </div>
-          <div className="flex-grow ml-4 items-center flex-col group">
+          {!isMobile && (
+            <div className="flex-none">
+              <Avatar className="border size-12 m-auto bg-muted-background dark:bg-foreground">
+                <AvatarImage
+                  src={logoUrl}
+                  alt={altText}
+                  className="object-contain"
+                />
+                <AvatarFallback>{altText[0]}</AvatarFallback>
+              </Avatar>
+            </div>
+          )}
+          <div className={cn(
+            "flex-grow items-center flex-col group",
+            isMobile ? "ml-0" : "ml-4"
+          )}>
             <CardHeader>
               <div className="flex flex-col gap-y-0">
                 <div className="flex items-center justify-between">
@@ -160,7 +167,8 @@ export const ResumeCard = ({
             animate={{ opacity: 1 }}
             transition={{ duration: 0.3, delay: 0.1 }}
             className={cn(
-              "pl-6 mt-1 relative border-l-2 border-muted ml-4",
+              "pl-6 mt-1 relative border-l-2 border-muted",
+              isMobile ? "ml-0" : "ml-4",
               isEducation ? "space-y-2" : 
               hasSubtabsNoDescription && isExpanded ? "space-y-2" : 
               description ? "space-y-2" : 
@@ -182,14 +190,16 @@ export const ResumeCard = ({
               >
                 <div className="flex justify-between items-center gap-x-2">
                   <div className="flex items-center">
-                    <Avatar className="border size-10 mr-3 bg-muted-background dark:bg-foreground">
-                      <AvatarImage
-                        src={subtab.logoUrl || logoUrl}
-                        alt={subtab.title}
-                        className="object-contain"
-                      />
-                      <AvatarFallback>{subtab.title[0]}</AvatarFallback>
-                    </Avatar>
+                    {!isMobile && (
+                      <Avatar className="border size-10 mr-3 bg-muted-background dark:bg-foreground">
+                        <AvatarImage
+                          src={subtab.logoUrl || logoUrl}
+                          alt={subtab.title}
+                          className="object-contain"
+                        />
+                        <AvatarFallback>{subtab.title[0]}</AvatarFallback>
+                      </Avatar>
+                    )}
                     <div className="group">
                       <h3 className="inline-flex items-center font-bold leading-none text-sm sm:text-sm">
                         {subtab.title}
@@ -229,7 +239,10 @@ export const ResumeCard = ({
                       animate={{ opacity: 1, height: "auto" }}
                       exit={{ opacity: 0, height: 0 }}
                       transition={{ duration: 0.3 }}
-                      className="mt-2 text-sm ml-[52px] overflow-hidden"
+                      className={cn(
+                        "mt-2 text-sm overflow-hidden", 
+                        isMobile ? "ml-0" : "ml-[52px]"
+                      )}
                     >
                       {subtab.description}
                     </motion.div>
