@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { DATA } from "@/data/resume";
 import Link from "next/link";
 import Markdown from "react-markdown";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { MenuIcon, X } from "lucide-react";
 
 const BLUR_FADE_DELAY = 0.04;
@@ -18,58 +18,55 @@ const BLUR_FADE_DELAY = 0.04;
 export default function Page() {
   const [selectedCategory, setSelectedCategory] = useState("Olympiad");
   const [isMobile, setIsMobile] = useState(false);
-  const [visibleSections, setVisibleSections] = useState({
-    work: false,
-    education: false,
-    awards: false
-  });
-
-  // Debounced resize handler to prevent excessive re-renders
-  const checkIfMobile = useCallback(() => {
-    const mobile = window.innerWidth < 768;
-    setIsMobile(mobile);
-    
-    // Only update section visibility on first load or when transitioning between mobile/desktop
-    if (mobile !== isMobile) {
-      setVisibleSections({
-        work: !mobile,
-        education: !mobile,
-        awards: !mobile
-      });
-    }
-  }, [isMobile]);
+  const [visibleSections, setVisibleSections] = useState<{
+    work: boolean;
+    education: boolean;
+    awards: boolean;
+  } | null>(null);
   
-  // Check if mobile on mount and when window resizes
-  useEffect(() => {
-    // Initial check
-    checkIfMobile();
-    
-    // Debounce resize event
-    let resizeTimer: NodeJS.Timeout;
-    const handleResize = () => {
-      clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(() => {
-        checkIfMobile();
-      }, 250); // 250ms debounce
-    };
-    
-    // Add event listener
-    window.addEventListener("resize", handleResize);
-    
-    // Cleanup
-    return () => {
-      window.removeEventListener("resize", handleResize);
-      clearTimeout(resizeTimer);
-    };
-  }, [checkIfMobile]);
+  const initializedRef = useRef(false);
 
-  // Use a more stable toggle function that won't re-create on render
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+      
+      if (!initializedRef.current || (mobile !== isMobile)) {
+        setVisibleSections({
+          work: !mobile,
+          education: !mobile,
+          awards: !mobile
+        });
+        initializedRef.current = true;
+      }
+    };
+    
+    handleResize();
+    
+    let resizeTimer: NodeJS.Timeout;
+    const debouncedResize = () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(handleResize, 100);
+    };
+    
+    window.addEventListener("resize", debouncedResize);
+    
+    return () => {
+      window.removeEventListener("resize", debouncedResize);
+      clearTimeout(resizeTimer);
+    };
+  }, [isMobile]);
+
   const toggleSection = useCallback((section: 'work' | 'education' | 'awards') => {
-    setVisibleSections(prev => ({
+    setVisibleSections(prev => prev ? {
       ...prev,
       [section]: !prev[section]
-    }));
+    } : null);
   }, []);
+
+  if (visibleSections === null) {
+    return null;
+  }
 
   return (
     <main className="flex flex-col min-h-[100dvh] space-y-4">
@@ -122,27 +119,54 @@ export default function Page() {
             </div>
           </BlurFade>
           
-          {visibleSections.work && DATA.work.map((work, id) => (
-            <BlurFade
-              key={work.company}
-              delay={BLUR_FADE_DELAY * 6 + id * 0.05}
-            >
-              <ResumeCard
+          {visibleSections.work && DATA.work.map((work, id) => {
+            let mobileTitle = work.company;
+            if (work.company === "Stanford Artificial Intelligence Laboratory") {
+              mobileTitle = "Stanford AI Lab";
+            } else if (work.company === "Mu Manor (Hacker House)") {
+              mobileTitle = "Mu Manor";
+            }
+            
+            return (
+              <BlurFade
                 key={work.company}
-                logoUrl={work.logoUrl}
-                altText={work.company}
-                title={work.company}
-                subtitle={work.title}
-                href={work.href}
-                badges={work.badges}
-                period={`${work.start} - ${work.end ?? "Present"}`}
-                description={work.description}
-                positionType={work.positionType}
-                subtabs={work.subtabs}
-                isMobile={isMobile}
-              />
-            </BlurFade>
-          ))}
+                delay={BLUR_FADE_DELAY * 6 + id * 0.05}
+              >
+                <ResumeCard
+                  key={work.company}
+                  logoUrl={work.logoUrl}
+                  altText={work.company}
+                  title={isMobile ? mobileTitle : work.company}
+                  subtitle={work.title}
+                  href={work.href}
+                  badges={work.badges}
+                  period={`${work.start} - ${work.end ?? "Present"}`}
+                  description={work.description}
+                  positionType={work.positionType}
+                  subtabs={work.subtabs ? work.subtabs.map(subtab => {
+                    let mobileSubtabTitle = subtab.title;
+                    if (subtab.title === "Ubicloud (YC W24)") {
+                      mobileSubtabTitle = "Ubicloud";
+                    } else if (subtab.title === "Stanford Institute for Economic Policy Research") {
+                      mobileSubtabTitle = "Stanford Economics Dept.";
+                    } else if (subtab.title === "Zage Lab, UC San Diego") {
+                      mobileSubtabTitle = "UC San Diego";
+                    } else if (subtab.title === "Burton Lab, Scripps Research Institute") {
+                      mobileSubtabTitle = "Scripps Research";
+                    } else if (subtab.title === "San Diego Supercomputer Center") {
+                      mobileSubtabTitle = "SDSC";
+                    }
+                    
+                    return {
+                      ...subtab,
+                      title: isMobile ? mobileSubtabTitle : subtab.title
+                    };
+                  }) : undefined}
+                  isMobile={isMobile}
+                />
+              </BlurFade>
+            );
+          })}
         </div>
       </section>
       <section id="education">
@@ -159,25 +183,42 @@ export default function Page() {
             </div>
           </BlurFade>
           
-          {visibleSections.education && DATA.education.map((education, id) => (
-            <BlurFade
-              key={education.school}
-              delay={BLUR_FADE_DELAY * 8 + id * 0.05}
-            >
-              <ResumeCard
+          {visibleSections.education && DATA.education.map((education, id) => {
+            let mobilePeriod = education.end ? `${education.start} - ${education.end}` : education.start;
+            if (education.school === "Stanford University" && isMobile) {
+              mobilePeriod = "Sep 2023 - On Leave";
+            }
+            
+            return (
+              <BlurFade
                 key={education.school}
-                href={education.href}
-                logoUrl={education.logoUrl}
-                altText={education.school}
-                title={education.school}
-                subtitle={education.degree}
-                period={education.end ? `${education.start} - ${education.end}` : education.start}
-                isEducation={true}
-                subtabs={education.subtabs}
-                isMobile={isMobile}
-              />
-            </BlurFade>
-          ))}
+                delay={BLUR_FADE_DELAY * 8 + id * 0.05}
+              >
+                <ResumeCard
+                  key={education.school}
+                  href={education.href}
+                  logoUrl={education.logoUrl}
+                  altText={education.school}
+                  title={education.school}
+                  subtitle={education.degree}
+                  period={isMobile ? mobilePeriod : (education.end ? `${education.start} - ${education.end}` : education.start)}
+                  isEducation={true}
+                  subtabs={education.subtabs ? education.subtabs.map(subtab => {
+                    let mobileSubtabTitle = subtab.title;
+                    if (subtab.title === "San Diego State University") {
+                      mobileSubtabTitle = "SDSU";
+                    }
+                    
+                    return {
+                      ...subtab,
+                      title: isMobile ? mobileSubtabTitle : subtab.title
+                    };
+                  }) : undefined}
+                  isMobile={isMobile}
+                />
+              </BlurFade>
+            );
+          })}
         </div>
       </section>
       <section id="awards">
@@ -187,11 +228,11 @@ export default function Page() {
             
             {visibleSections.awards && (
               <div className="flex gap-2 mr-3">
-                {["Olympiad", "Research", "Startup"].map((tab) => (
+                {["Olympiad", "Research", "Other"].map((tab) => (
                   <div 
                     key={tab} 
                     className={`px-3 py-1 rounded-md text-center cursor-pointer text-sm ${tab === selectedCategory ? "bg-foreground text-background" : "bg-muted text-foreground"}`}
-                    onClick={() => setSelectedCategory(tab)}
+                    onClick={() => setSelectedCategory(tab === "Other" && selectedCategory === "Startup" ? "Other" : tab)}
                   >
                     {tab}
                   </div>
@@ -210,27 +251,32 @@ export default function Page() {
           
           {visibleSections.awards && (
             <ul>
-              {DATA.awards.filter(award => award.category === selectedCategory).map((award, index, arr) => (
-                <li 
-                  key={award.title} 
-                  className={`py-3 ${index < arr.length - 1 ? "border-b border-border" : ""}`}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-x-2">
-                      <span className="text-base font-medium">{award.title}</span>
-                      {(!isMobile && award.tag) && (
-                        <Badge variant="outline" className="text-xs font-normal">
-                          {award.tag}
-                        </Badge>
-                      )}
+              {DATA.awards
+                .filter(award => {
+                  const displayCategory = award.category === "Startup" ? "Other" : award.category;
+                  return displayCategory === selectedCategory;
+                })
+                .map((award, index, arr) => (
+                  <li 
+                    key={award.title} 
+                    className={`py-3 ${index < arr.length - 1 ? "border-b border-border" : ""}`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-x-2">
+                        <span className="text-base font-medium">{award.title}</span>
+                        {(!isMobile && award.tag) && (
+                          <Badge variant="outline" className="text-xs font-normal">
+                            {award.tag}
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="text-sm tabular-nums text-muted-foreground">{award.date}</div>
                     </div>
-                    <div className="text-sm tabular-nums text-muted-foreground">{award.date}</div>
-                  </div>
-                  {award.description && (
-                    <p className="mt-1 text-sm text-muted-foreground">{award.description}</p>
-                  )}
-                </li>
-              ))}
+                    {award.description && (
+                      <p className="mt-1 text-sm text-muted-foreground">{award.description}</p>
+                    )}
+                  </li>
+                ))}
             </ul>
           )}
         </div>
