@@ -242,35 +242,51 @@ export default function Page() {
       <section id="awards">
         <div className="flex min-h-0 flex-col gap-y-3">
           <BlurFade delay={BLUR_FADE_DELAY * 10.6}>
-            <div className="flex justify-between items-center">
-              <h2 className="text-xl font-bold">awards</h2>
-              <button 
-                onClick={() => toggleSection('awards')} 
-                className="p-1 rounded-md hover:bg-muted"
-              >
-                {visibleSections.awards ? <X size={20} /> : <MenuIcon size={20} />}
-              </button>
-            </div>
+            {isMobile ? (
+              /* Mobile layout - stacked header and tabs */
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-bold">awards</h2>
+                <button 
+                  onClick={() => toggleSection('awards')} 
+                  className="p-1 rounded-md hover:bg-muted"
+                >
+                  {visibleSections.awards ? <X size={20} /> : <MenuIcon size={20} />}
+                </button>
+              </div>
+            ) : (
+              /* Desktop layout - title on left, tabs and toggle on right */
+              <div className="flex items-center">
+                <h2 className="text-xl font-bold mr-auto">awards</h2>
+                
+                {visibleSections.awards && (
+                  <div className="flex gap-2 mr-3">
+                    {["Olympiad", "Research", "Other"].map((tab) => (
+                      <div 
+                        key={tab} 
+                        className={`px-3 py-1 rounded-md text-center cursor-pointer text-sm ${tab === selectedCategory ? "bg-foreground text-background" : "bg-muted text-foreground"}`}
+                        onClick={() => setSelectedCategory(tab === "Other" && selectedCategory === "Startup" ? "Other" : tab)}
+                      >
+                        {tab}
+                      </div>
+                    ))}
+                  </div>
+                )}
+                
+                <button 
+                  onClick={() => toggleSection('awards')} 
+                  className="p-1 rounded-md hover:bg-muted"
+                >
+                  {visibleSections.awards ? <X size={20} /> : <MenuIcon size={20} />}
+                </button>
+              </div>
+            )}
           </BlurFade>
           
           {visibleSections.awards && (
             <>
+              {/* Mobile-only tabs row */}
               {isMobile && (
                 <div className="flex gap-2 overflow-x-auto pb-1 pt-1">
-                  {["Olympiad", "Research", "Other"].map((tab) => (
-                    <div 
-                      key={tab} 
-                      className={`px-3 py-1 rounded-md text-center cursor-pointer text-sm ${tab === selectedCategory ? "bg-foreground text-background" : "bg-muted text-foreground"}`}
-                      onClick={() => setSelectedCategory(tab === "Other" && selectedCategory === "Startup" ? "Other" : tab)}
-                    >
-                      {tab}
-                    </div>
-                  ))}
-                </div>
-              )}
-              
-              {!isMobile && (
-                <div className="flex justify-end gap-2 -mt-8 mb-3">
                   {["Olympiad", "Research", "Other"].map((tab) => (
                     <div 
                       key={tab} 
