@@ -150,7 +150,7 @@ export default function Page() {
                     if (subtab.title === "Ubicloud (YC W24)") {
                       mobileSubtabTitle = "Ubicloud";
                     } else if (subtab.title === "Stanford Institute for Economic Policy Research") {
-                      mobileSubtabTitle = "Stanford Economics.";
+                      mobileSubtabTitle = "SIEPR";
                     } else if (subtab.title === "Zage Lab, UC San Diego") {
                       mobileSubtabTitle = "UC San Diego";
                     } else if (subtab.title === "Burton Lab, Scripps Research Institute") {
@@ -241,31 +241,62 @@ export default function Page() {
       </section>
       <section id="awards">
         <div className="flex flex-col gap-4">
-          <div className="flex items-center">
-            <h2 className={`text-xl font-bold ${isMobile ? 'mb-2' : ''} mr-auto`}>awards</h2>
-            
-            {visibleSections.awards && (
-              <div className={`flex gap-2 mr-3 ${isMobile ? 'mt-2' : ''}`}>
-                {["Olympiad", "Research", "Other"].map((tab) => (
-                  <div 
-                    key={tab} 
-                    className={`px-3 py-1 rounded-md text-center cursor-pointer text-sm ${tab === selectedCategory ? "bg-foreground text-background" : "bg-muted text-foreground"}`}
-                    onClick={() => setSelectedCategory(tab === "Other" && selectedCategory === "Startup" ? "Other" : tab)}
-                  >
-                    {tab}
-                  </div>
-                ))}
+          {isMobile ? (
+            /* Mobile layout - stacked vertically */
+            <>
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-bold">awards</h2>
+                <button 
+                  onClick={() => toggleSection('awards')} 
+                  className="p-1 flex items-center justify-center h-8 w-8 rounded-md hover:bg-muted"
+                  aria-label={visibleSections.awards ? "Collapse awards" : "Expand awards"}
+                >
+                  {visibleSections.awards ? <X size={20} /> : <MenuIcon size={20} />}
+                </button>
               </div>
-            )}
-            
-            <button 
-              onClick={() => toggleSection('awards')} 
-              className={`p-1 flex items-center justify-center h-8 w-8 rounded-md hover:bg-muted ${isMobile ? 'mt-2' : ''}`}
-              aria-label={visibleSections.awards ? "Collapse awards" : "Expand awards"}
-            >
-              {visibleSections.awards ? <X size={20} /> : <MenuIcon size={20} />}
-            </button>
-          </div>
+              
+              {visibleSections.awards && (
+                <div className="flex gap-2 overflow-x-auto py-1 -mt-1">
+                  {["Olympiad", "Research", "Other"].map((tab) => (
+                    <div 
+                      key={tab} 
+                      className={`px-3 py-1 rounded-md text-center cursor-pointer text-sm ${tab === selectedCategory ? "bg-foreground text-background" : "bg-muted text-foreground"}`}
+                      onClick={() => setSelectedCategory(tab === "Other" && selectedCategory === "Startup" ? "Other" : tab)}
+                    >
+                      {tab}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
+          ) : (
+            /* Desktop layout - side by side */
+            <div className="flex items-center">
+              <h2 className="text-xl font-bold mr-auto">awards</h2>
+              
+              {visibleSections.awards && (
+                <div className="flex gap-2 mr-3">
+                  {["Olympiad", "Research", "Other"].map((tab) => (
+                    <div 
+                      key={tab} 
+                      className={`px-3 py-1 rounded-md text-center cursor-pointer text-sm ${tab === selectedCategory ? "bg-foreground text-background" : "bg-muted text-foreground"}`}
+                      onClick={() => setSelectedCategory(tab === "Other" && selectedCategory === "Startup" ? "Other" : tab)}
+                    >
+                      {tab}
+                    </div>
+                  ))}
+                </div>
+              )}
+              
+              <button 
+                onClick={() => toggleSection('awards')} 
+                className="p-1 flex items-center justify-center h-8 w-8 rounded-md hover:bg-muted"
+                aria-label={visibleSections.awards ? "Collapse awards" : "Expand awards"}
+              >
+                {visibleSections.awards ? <X size={20} /> : <MenuIcon size={20} />}
+              </button>
+            </div>
+          )}
           
           {visibleSections.awards && (
             <ul>
