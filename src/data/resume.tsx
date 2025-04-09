@@ -68,7 +68,7 @@ export const DATA: ResumeData = {
       end: "Present",
       positionType: "Full-time",
       description:
-        "Building KoalaWare — AI session replay analytics. Backed by $1M pre-seed from Y Combinator, OVO Fund, and angel investors.",
+        "Building KoalaWare. Backed by $1M pre-seed from Y Combinator, OVO Fund, and angel investors.",
     },
     {
       company: "Stanford Artificial Intelligence Laboratory",
